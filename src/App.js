@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import CourseList from "./components/CourseList";
+import { useData } from "./utilities/firebase.js";
 
 //check the meeting times
 const meetsPat =
@@ -39,25 +40,11 @@ const Banner = ({ title }) => <h1>{title}</h1>;
 
 //App
 const App = () => {
-  //setting the schedule uses state
-  const [schedule, setSchedule] = useState();
-  const url = "https://courses.cs.northwestern.edu/394/data/cs-courses.php";
+  const [schedule, loading, error] = useData("/", addScheduleTimes);
 
-  //fetches the schedule asynchronously with the Effect hook
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      const response = await fetch(url);
-      if (!response.ok) throw response;
-      const json = await response.json();
-      setSchedule(addScheduleTimes(json));
-    };
-    fetchSchedule();
-  }, []);
+  if (error) return <h1>{error}</h1>;
+  if (loading) return <h1>Loading the schedule...</h1>;
 
-  //while schedule is loading...
-  if (!schedule) return <h1>Loading schedule...</h1>;
-
-  //returns a banner with the ti
   return (
     <div className="container">
       <Banner title={schedule.title} />
@@ -65,5 +52,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;
