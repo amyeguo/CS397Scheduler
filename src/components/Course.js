@@ -1,5 +1,7 @@
 import { hasConflict, getCourseTerm } from "../utilities/times.js";
 import { setData } from "../utilities/firebase";
+import { useUserState } from "../utilities/firebase.js";
+
 //toggle takes in an element and a list
 //if the element is in the list, then return a list with that element removed
 //otherwise add the element to the list
@@ -31,6 +33,7 @@ const getCourseMeetingData = (course) => {
   alert("Invalid meeting data");
   return null;
 };
+
 const reschedule = async (course, meets) => {
   if (meets && window.confirm(`Change ${course.id} to ${meets}?`)) {
     try {
@@ -44,6 +47,7 @@ const reschedule = async (course, meets) => {
 const Course = ({ course, selected, setSelected }) => {
   const isSelected = selected.includes(course);
   const isDisabled = hasConflict(course, selected);
+  const [user] = useUserState();
   const style = {
     backgroundColor: isDisabled
       ? "lightgrey"
@@ -57,7 +61,9 @@ const Course = ({ course, selected, setSelected }) => {
       className="card m-1 p-2"
       style={style}
       onClick={isDisabled ? null : () => setSelected(toggle(course, selected))}
-      onDoubleClick={() => reschedule(course, getCourseMeetingData(course))}
+      onDoubleClick={
+        !user ? null : () => reschedule(course, getCourseMeetingData(course))
+      }
     >
       <div className="card-body">
         <div className="card-title">
